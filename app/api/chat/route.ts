@@ -58,7 +58,11 @@ export async function POST(req: Request) {
     // 4. Generación basada exclusivamente en los chunks recuperados
     const { respuesta, fuentes } = await generarRespuesta(pregunta, chunks);
 
-    return NextResponse.json({ respuesta, fuentes });
+    // Si el modelo igualmente no encontró respuesta en el contexto, no mostramos
+    // fuentes (evita tarjetas irrelevantes en una respuesta de "no sé").
+    const seRindio = /no encuentro esa información/i.test(respuesta);
+
+    return NextResponse.json({ respuesta, fuentes: seRindio ? [] : fuentes });
   } catch (err) {
     const mensaje = err instanceof Error ? err.message : "Error desconocido.";
     console.error("Error en /api/chat:", mensaje);

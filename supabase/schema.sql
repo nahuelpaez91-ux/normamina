@@ -23,11 +23,13 @@ create table if not exists documentos (
   creado_en   timestamptz not null default now()
 );
 
--- 3. Índice para búsqueda por similitud (coseno)
-create index if not exists documentos_embedding_idx
-  on documentos
-  using ivfflat (embedding vector_cosine_ops)
-  with (lists = 100);
+-- 3. Búsqueda por similitud
+-- NO usamos un índice aproximado (ivfflat/hnsw): con decenas o cientos de
+-- chunks, la búsqueda exacta (seq scan) es instantánea y tiene recall perfecto.
+-- Un índice ivfflat con pocas filas degrada mucho el recall.
+-- Si en el futuro cargás MILES de documentos, podés crear un índice así
+-- (ajustando `lists` ~= filas/1000) y subir `ivfflat.probes` en la sesión:
+--   create index on documentos using ivfflat (embedding vector_cosine_ops) with (lists = 100);
 
 -- 4. Función de recuperación: devuelve los chunks más similares a la pregunta
 create or replace function match_documentos (

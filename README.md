@@ -20,8 +20,8 @@
 | ----------- | ------------------------------------------------------ |
 | Frontend    | Next.js 14 (App Router) + TypeScript + Tailwind CSS    |
 | Base vector | Supabase (Postgres + extensión `pgvector`)            |
-| LLM         | Google Gemini (`gemini-2.0-flash`)                     |
-| Embeddings  | Google Gemini (`text-embedding-004`, 768 dims)         |
+| LLM         | Google Gemini (`gemini-2.5-flash-lite`)                |
+| Embeddings  | Google Gemini (`gemini-embedding-001`, 768 dims)       |
 | Deploy      | Vercel (plan Hobby)                                    |
 
 La capa de IA vive en `lib/ai/`. Para cambiar de proveedor (Groq, Xenova local, OpenAI…), creá un archivo análogo a `lib/ai/gemini.ts` y cambiá los imports de `lib/ai/index.ts`. El resto de la app no se entera.
@@ -58,13 +58,16 @@ cp .env.example .env.local
 
 ```env
 GEMINI_API_KEY=tu_api_key_de_gemini
-GEMINI_CHAT_MODEL=gemini-2.0-flash
-GEMINI_EMBED_MODEL=text-embedding-004
+GEMINI_CHAT_MODEL=gemini-2.5-flash-lite
+GEMINI_EMBED_MODEL=gemini-embedding-001
+GEMINI_EMBED_DIM=768
 NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=tu_service_role_key
 ```
 
-> ⚠️ La `service_role` key es secreta y solo se usa server-side. Nunca la subas al repo (`.env.local` ya está en `.gitignore`).
+> ⚠️ La `service_role` key (o la `sb_secret_...` en proyectos nuevos de Supabase) es secreta y solo se usa server-side. Nunca la subas al repo (`.env.local` ya está en `.gitignore`).
+>
+> ℹ️ La disponibilidad de modelos varía por cuenta/región. Si ves un error `404 model not found`, listá los modelos disponibles para tu key y ajustá `GEMINI_CHAT_MODEL` / `GEMINI_EMBED_MODEL`.
 
 ### 5. Cargar los documentos (ingesta)
 

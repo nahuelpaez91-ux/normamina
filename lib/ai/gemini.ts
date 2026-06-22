@@ -6,11 +6,33 @@
  * exporte `embeddingGemini`/`generarRespuestaGemini` equivalentes y cambiá el
  * import en `lib/ai/index.ts`. El resto de la app no se entera.
  */
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import { GoogleGenerativeAI, type EmbedContentRequest } from "@google/generative-ai";
 import type { Chunk, Fuente, RespuestaIA } from "./types";
 
-const CHAT_MODEL = process.env.GEMINI_CHAT_MODEL || "gemini-2.0-flash";
-const EMBED_MODEL = process.env.GEMINI_EMBED_MODEL || "text-embedding-004";
+const CHAT_MODEL = process.env.GEMINI_CHAT_MODEL || "gemini-2.5-flash";
+const EMBED_MODEL = process.env.GEMINI_EMBED_MODEL || "gemini-embedding-001";
+// Dimensiones del embedding. Debe coincidir con la columna vector(N) en Supabase.
+const EMBED_DIM = Number(process.env.GEMINI_EMBED_DIM || 768);
+
+/**
+ * Reintenta una operación ante errores transitorios de la API
+ * (503 sobrecarga, 429 rate limit) con backoff exponencial.
+ */
+async function conReintentos<T>(fn: () => Promise<T>, intentos = 3): Promise<T> {
+  let ultimoError: unknown;
+  for (let i = 0; i < intentos; i++) {
+    try {
+      return await fn();
+    } catch (e) {
+      ultimoError = e;
+      const msg = e instanceof Error ? e.message : String(e);
+      const transitorio = /\[(429|500|503)|overloaded|high demand|Service Unavailable/i.test(msg);
+      if (!transitorio || i === intentos - 1) throw e;
+      await new Promise((r) => setTimeout(r, 800 * 2 ** i)); // 0.8s, 1.6s, 3.2s
+    }
+  }
+  throw ultimoError;
+}
 
 function getClient(): GoogleGenerativeAI {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -23,10 +45,16 @@ function getClient(): GoogleGenerativeAI {
   return new GoogleGenerativeAI(apiKey);
 }
 
-/** Genera el embedding de un texto. text-embedding-004 devuelve 768 dimensiones. */
+/** Genera el embedding de un texto, con EMBED_DIM dimensiones. */
 export async function embeddingGemini(texto: string): Promise<number[]> {
   const model = getClient().getGenerativeModel({ model: EMBED_MODEL });
-  const res = await model.embedContent(texto);
+  // `outputDimensionality` es soportado por la API (recorta el embedding a N dims)
+  // pero el tipo del SDK v0.21 no lo declara; lo extendemos sin recurrir a `any`.
+  const req: EmbedContentRequest & { outputDimensionality?: number } = {
+    content: { role: "user", parts: [{ text: texto }] },
+    outputDimensionality: EMBED_DIM,
+  };
+  const res = await conReintentos(() => model.embedContent(req));
   return res.embedding.values;
 }
 
@@ -71,7 +99,7 @@ export async function generarRespuestaGemini(
     chunks
   )}\n\n=========\n\nPregunta del usuario: ${pregunta}\n\nRespondé citando los artículos correspondientes.`;
 
-  const result = await model.generateContent(prompt);
+  const result = await conReintentos(() => model.generateContent(prompt));
   const respuesta = result.response.text().trim();
 
   return {
