@@ -188,13 +188,22 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="space-y-2 pb-3 pt-2 text-center text-xs text-slate-500">
+      <footer className="mt-2 space-y-3 border-t border-white/10 pb-4 pt-5 text-center text-xs text-slate-500">
+        <div>
+          <p className="text-sm font-semibold text-slate-200">Andrés Nahuel Páez</p>
+          <p className="text-slate-400">Desarrollador de soluciones con IA · La Rioja, Argentina</p>
+        </div>
         <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-          <span>
-            Hecho por <span className="font-medium text-slate-300">Nahuel Páez</span>
-          </span>
           <a className="transition hover:text-mina-300" href="mailto:nahuelpaez91@gmail.com">
             nahuelpaez91@gmail.com
+          </a>
+          <a
+            className="transition hover:text-mina-300"
+            href="https://wa.me/5493804262454"
+            target="_blank"
+            rel="noreferrer"
+          >
+            WhatsApp: 380 426-2454
           </a>
           <a
             className="transition hover:text-mina-300"
