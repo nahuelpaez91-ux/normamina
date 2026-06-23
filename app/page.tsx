@@ -8,10 +8,10 @@ import SourcesPanel from "@/components/SourcesPanel";
 import ChatMessage from "@/components/ChatMessage";
 
 const SUGERENCIAS = [
-  "¿Qué categorías de minas existen?",
-  "¿Cuándo caduca una concesión minera por falta de pago del canon?",
-  "¿Qué exige la normativa ambiental para iniciar actividad minera?",
-  "¿A quién pertenecen las minas?",
+  "¿Qué necesito presentar antes de iniciar una actividad minera?",
+  "¿Qué obligaciones ambientales tiene el titular de una mina?",
+  "¿Qué pasa si no pago el canon minero?",
+  "¿Quién es la autoridad minera en La Rioja?",
 ];
 
 export default function Home() {
@@ -188,8 +188,26 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="pb-2 text-center text-xs text-slate-600">
-        NormaMina · RAG con Next.js, Supabase (pgvector) y Gemini · Textos de muestra con fines de demostración.
+      <footer className="space-y-2 pb-3 pt-2 text-center text-xs text-slate-500">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+          <span>
+            Hecho por <span className="font-medium text-slate-300">Nahuel Páez</span>
+          </span>
+          <a className="transition hover:text-mina-300" href="mailto:nahuelpaez91@gmail.com">
+            nahuelpaez91@gmail.com
+          </a>
+          <a
+            className="transition hover:text-mina-300"
+            href="https://github.com/nahuelpaez91-ux/normamina"
+            target="_blank"
+            rel="noreferrer"
+          >
+            GitHub
+          </a>
+        </div>
+        <div className="text-slate-600">
+          RAG con Next.js, Supabase (pgvector) y Gemini · Textos de muestra con fines de demostración.
+        </div>
       </footer>
     </div>
   );

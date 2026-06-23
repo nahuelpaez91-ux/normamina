@@ -66,6 +66,24 @@ export async function POST(req: Request) {
   } catch (err) {
     const mensaje = err instanceof Error ? err.message : "Error desconocido.";
     console.error("Error en /api/chat:", mensaje);
-    return NextResponse.json({ error: mensaje }, { status: 500 });
+
+    // Mensaje amable ante saturación/cuota del proveedor de IA (free tier).
+    const saturado = /\[(429|503)|overloaded|high demand|Service Unavailable|quota/i.test(
+      mensaje
+    );
+    if (saturado) {
+      return NextResponse.json(
+        {
+          error:
+            "El servicio de IA está con mucha demanda en este momento. Esperá unos segundos y volvé a intentar.",
+        },
+        { status: 503 }
+      );
+    }
+
+    return NextResponse.json(
+      { error: "Ocurrió un error procesando la consulta. Intentá nuevamente." },
+      { status: 500 }
+    );
   }
 }

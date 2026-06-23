@@ -9,10 +9,17 @@
 import { GoogleGenerativeAI, type EmbedContentRequest } from "@google/generative-ai";
 import type { Chunk, Fuente, RespuestaIA } from "./types";
 
-const CHAT_MODEL = process.env.GEMINI_CHAT_MODEL || "gemini-2.5-flash";
+const CHAT_MODEL = process.env.GEMINI_CHAT_MODEL || "gemini-2.5-flash-lite";
 const EMBED_MODEL = process.env.GEMINI_EMBED_MODEL || "gemini-embedding-001";
 // Dimensiones del embedding. Debe coincidir con la columna vector(N) en Supabase.
 const EMBED_DIM = Number(process.env.GEMINI_EMBED_DIM || 768);
+// Modelos de respaldo: si el principal está saturado (503), se prueban en orden.
+const CHAT_FALLBACKS = (
+  process.env.GEMINI_CHAT_FALLBACKS || "gemini-flash-lite-latest,gemini-2.5-flash"
+)
+  .split(",")
+  .map((m) => m.trim())
+  .filter((m) => m && m !== CHAT_MODEL);
 
 /**
  * Reintenta una operación ante errores transitorios de la API
@@ -90,20 +97,34 @@ export async function generarRespuestaGemini(
   pregunta: string,
   chunks: Chunk[]
 ): Promise<RespuestaIA> {
-  const model = getClient().getGenerativeModel({
-    model: CHAT_MODEL,
-    systemInstruction: SYSTEM_INSTRUCTION,
-  });
-
+  const client = getClient();
   const prompt = `Fragmentos de normativa disponibles:\n\n${construirContexto(
     chunks
   )}\n\n=========\n\nPregunta del usuario: ${pregunta}\n\nRespondé citando los artículos correspondientes.`;
 
-  const result = await conReintentos(() => model.generateContent(prompt));
-  const respuesta = result.response.text().trim();
+  // Se intenta el modelo principal y, si está saturado, los de respaldo.
+  const modelos = [CHAT_MODEL, ...CHAT_FALLBACKS];
+  let ultimoError: unknown;
 
-  return {
-    respuesta,
-    fuentes: chunksAFuentes(chunks),
-  };
+  for (const nombre of modelos) {
+    try {
+      const model = client.getGenerativeModel({
+        model: nombre,
+        systemInstruction: SYSTEM_INSTRUCTION,
+      });
+      const result = await conReintentos(() => model.generateContent(prompt));
+      return {
+        respuesta: result.response.text().trim(),
+        fuentes: chunksAFuentes(chunks),
+      };
+    } catch (e) {
+      ultimoError = e;
+      // Solo pasamos al siguiente modelo si el error es de saturación/cuota.
+      const msg = e instanceof Error ? e.message : String(e);
+      if (!/\[(429|500|503)|overloaded|high demand|Service Unavailable|quota/i.test(msg)) {
+        throw e;
+      }
+    }
+  }
+  throw ultimoError;
 }
