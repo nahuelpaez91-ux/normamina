@@ -84,12 +84,12 @@ export default function Home() {
           </div>
         </div>
         <a
-          href="https://github.com"
+          href="https://github.com/nahuelpaez91-ux/normamina"
           target="_blank"
           rel="noreferrer"
           className="hidden rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-white/5 sm:inline-block"
         >
-          Pieza de portfolio
+          Ver código en GitHub
         </a>
       </header>
 
