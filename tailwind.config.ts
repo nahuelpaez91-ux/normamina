@@ -9,26 +9,28 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        mina: {
-          50: "#f0fdf9",
-          100: "#ccfbef",
-          200: "#99f6e0",
-          300: "#5eead4",
-          400: "#2dd4bf",
-          500: "#14b8a6",
-          600: "#0d9488",
-          700: "#0f766e",
-          800: "#115e59",
-          900: "#134e4a",
-          950: "#042f2e",
+        // Dorado / mineral — acento principal
+        oro: {
+          50: "#fdf8ed",
+          100: "#f8ecca",
+          200: "#f1d893",
+          300: "#e9c25b",
+          400: "#e3b341",
+          500: "#d4a017", // dorado base
+          600: "#b8860b",
+          700: "#92670a",
+          800: "#78520f",
+          900: "#664512",
+          950: "#3a2507",
         },
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
       },
       keyframes: {
         "fade-in-up": {
-          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "0%": { opacity: "0", transform: "translateY(10px)" },
           "100%": { opacity: "1", transform: "translateY(0)" },
         },
         "pulse-dot": {
@@ -37,7 +39,7 @@ const config: Config = {
         },
       },
       animation: {
-        "fade-in-up": "fade-in-up 0.35s ease-out",
+        "fade-in-up": "fade-in-up 0.4s ease-out both",
         "pulse-dot": "pulse-dot 1.2s ease-in-out infinite",
       },
     },

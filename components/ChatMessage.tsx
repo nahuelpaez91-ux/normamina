@@ -9,7 +9,7 @@ export default function ChatMessage({ mensaje }: { mensaje: Mensaje }) {
     <div className={`flex animate-fade-in-up gap-3 ${esUsuario ? "flex-row-reverse" : ""}`}>
       <div
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-          esUsuario ? "bg-slate-700 text-slate-200" : "bg-mina-500/20 text-mina-300"
+          esUsuario ? "bg-stone-700 text-stone-200" : "bg-oro-500/20 text-oro-300"
         }`}
         aria-hidden
       >
@@ -19,8 +19,8 @@ export default function ChatMessage({ mensaje }: { mensaje: Mensaje }) {
       <div
         className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
           esUsuario
-            ? "rounded-tr-sm bg-mina-600 text-white"
-            : "rounded-tl-sm border border-white/10 bg-slate-900/60 text-slate-100"
+            ? "rounded-tr-sm bg-oro-600 text-stone-950"
+            : "rounded-tl-sm border border-white/10 bg-stone-900/60 text-stone-100"
         }`}
       >
         <p className="respuesta">{mensaje.contenido}</p>
@@ -30,7 +30,7 @@ export default function ChatMessage({ mensaje }: { mensaje: Mensaje }) {
             {mensaje.fuentes.map((f, i) => (
               <span
                 key={i}
-                className="rounded-md bg-mina-500/10 px-2 py-0.5 text-[11px] font-medium text-mina-300"
+                className="rounded-md bg-oro-500/10 px-2 py-0.5 text-[11px] font-medium text-oro-300"
                 title={`${f.documento} — ${f.articulo}`}
               >
                 {f.articulo}
